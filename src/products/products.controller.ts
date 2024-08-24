@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,7 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
+import { catchError } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { PRODUCT_SERVICE } from '../config';
 import { PaginationDto } from '../common';
@@ -37,15 +36,23 @@ export class ProductsController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: string) {
-    try {
-      const product = await firstValueFrom(
-        this.productsClient.send({ cmd: 'find_one_product' }, { id }),
-      );
+    // opcion #1 - con observable
+    return this.productsClient.send({ cmd: 'find_one_product' }, { id }).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
+    );
 
-      return product;
-    } catch (error) {
-      throw new RpcException(error);
-    }
+    // opcion #2 - funciona igual que lo anterior
+    // try {
+    //   const product = await firstValueFrom(
+    //     this.productsClient.send({ cmd: 'find_one_product' }, { id }),
+    //   );
+
+    //   return product;
+    // } catch (error) {
+    //   throw new RpcException(error);
+    // }
   }
 
   @Patch(':id')
