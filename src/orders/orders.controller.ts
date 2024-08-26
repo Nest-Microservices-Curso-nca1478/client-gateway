@@ -60,7 +60,16 @@ export class OrdersController {
   }
 
   @Put(':id')
-  changeStatus(@Param('id') id: string) {
-    return this.ordersClient.send('changeOrderStatus', { id });
+  async changeStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() statusOrderDto: StatusOrderDto,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.ordersClient.send('changeOrderStatus', { id, ...statusOrderDto }),
+      );
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 }
