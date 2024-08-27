@@ -11,21 +11,19 @@ import {
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { ORDER_SERVICE } from '../config';
+import { NATS_SERVICE } from '../config';
 import { CreateOrderDto, PaginationOrderDto, StatusOrderDto } from './dto';
 import { PaginationDto } from '../common';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(
-    @Inject(ORDER_SERVICE) private readonly ordersClient: ClientProxy,
-  ) {}
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
   @Post()
   async create(@Body() createOrderDto: CreateOrderDto) {
     try {
       return await firstValueFrom(
-        this.ordersClient.send('createOrder', createOrderDto),
+        this.client.send('createOrder', createOrderDto),
       );
     } catch (error) {
       throw new RpcException(error);
@@ -34,7 +32,7 @@ export class OrdersController {
 
   @Get()
   findAll(@Query() paginationOrderDto: PaginationOrderDto) {
-    return this.ordersClient.send('findAllOrders', paginationOrderDto);
+    return this.client.send('findAllOrders', paginationOrderDto);
   }
 
   @Get('status/:status')
@@ -44,7 +42,7 @@ export class OrdersController {
   ) {
     try {
       return await firstValueFrom(
-        this.ordersClient.send('findAllOrders', {
+        this.client.send('findAllOrders', {
           ...paginationDto,
           status: statusOrderDto.status,
         }),
@@ -57,9 +55,7 @@ export class OrdersController {
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
-      return await firstValueFrom(
-        this.ordersClient.send('findOneOrder', { id }),
-      );
+      return await firstValueFrom(this.client.send('findOneOrder', { id }));
     } catch (error) {
       throw new RpcException(error);
     }
@@ -72,7 +68,7 @@ export class OrdersController {
   ) {
     try {
       return await firstValueFrom(
-        this.ordersClient.send('changeOrderStatus', { id, ...statusOrderDto }),
+        this.client.send('changeOrderStatus', { id, ...statusOrderDto }),
       );
     } catch (error) {
       throw new RpcException(error);

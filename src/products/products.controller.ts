@@ -32,23 +32,11 @@ export class ProductsController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: string) {
-    // opcion #1 - con observable
     return this.client.send({ cmd: 'find_one_product' }, { id }).pipe(
       catchError((err) => {
         throw new RpcException(err);
       }),
     );
-
-    // opcion #2 - funciona igual que lo anterior
-    // try {
-    //   const product = await firstValueFrom(
-    //     this.client.send({ cmd: 'find_one_product' }, { id }),
-    //   );
-
-    //   return product;
-    // } catch (error) {
-    //   throw new RpcException(error);
-    // }
   }
 
   @Patch(':id')
