@@ -15,3 +15,9 @@
 2. Instalar dependencias `npm install`.
 3. Crear un archivo `.env` basado en el `.env.template`.
 4. Ejecutar `npm run start:dev`.
+
+## Ejecutar nats desde consola con docker.
+
+```
+docker run -d --name nats-server -p 4222:4222 -p 8222:8222 nats
+```
