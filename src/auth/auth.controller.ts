@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from '../config';
 
@@ -16,8 +16,8 @@ export class AuthController {
     return this.client.send('auth.login.user', loginUserDto);
   }
 
-  @Get('verify/:token')
-  verifyToken(@Param() token: string) {
-    return this.client.send('auth.verify.token', { token });
+  @Get('verify')
+  verifyToken() {
+    return this.client.send('auth.verify.token', {});
   }
 }
