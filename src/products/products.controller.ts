@@ -9,18 +9,21 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { catchError } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { NATS_SERVICE } from '../config';
 import { PaginationDto } from '../common';
 import { CreateProductDto, UpdateProductDto } from './dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller('products')
 export class ProductsController {
   constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   create(@Body() createProductDto: CreateProductDto) {
     return this.client.send({ cmd: 'create_product' }, createProductDto);
   }
@@ -40,6 +43,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
@@ -54,6 +58,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
   remove(@Param('id', ParseIntPipe) id: string) {
     return this.client.send({ cmd: 'delete_product' }, { id }).pipe(
       catchError((err) => {
